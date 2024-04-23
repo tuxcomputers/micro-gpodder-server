@@ -149,7 +149,7 @@ class GPodder
 
 	public function listActions(int $subscription): array
 	{
-		return $this->db->all('WITH ACTIONS_INFO AS (SELECT S.id, e.id AS action_id MAX(E.CHANGED) AS changed, E.ID AS EPISODES_ACTION_ID, E.action, E.url, JSON_EXTRACT(E.DATA, \'$.position\') AS position, JSON_EXTRACT(E.DATA, \'$.total\') AS total, JSON_EXTRACT(D.DATA, \'$.caption\') AS device
+		return $this->db->all('WITH ACTIONS_INFO AS (SELECT S.id, e.id AS action_id, MAX(E.CHANGED) AS changed, E.ID AS EPISODES_ACTION_ID, E.action, E.url, JSON_EXTRACT(E.DATA, \'$.position\') AS position, JSON_EXTRACT(E.DATA, \'$.total\') AS total, JSON_EXTRACT(D.DATA, \'$.caption\') AS device
 			FROM SUBSCRIPTIONS S
 			LEFT JOIN EPISODES_ACTIONS E ON S.ID = E.SUBSCRIPTION
 			LEFT JOIN DEVICES D ON D.DEVICEID = JSON_EXTRACT(E.DATA, \'$.device\')
