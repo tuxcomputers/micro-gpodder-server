@@ -149,10 +149,15 @@ class GPodder
 
 	public function listActions(int $subscription): array
 	{
-		return $this->db->all('SELECT *, json_extract(data, \'$.device\') AS device,
-			json_extract(data, \'$.timestamp\') AS timestamp
-			FROM episodes_actions
-			WHERE user = ? AND subscription = ?
-			ORDER BY changed DESC;', $this->user->id, $subscription);
+		return $this->db->all('WITH ACTIONS_INFO AS (SELECT S.ID, MAX(E.CHANGED) AS CHANGED, E.ID AS EPISODES_ACTION_ID, E.ACTION, E.URL, JSON_EXTRACT(E.DATA, \'$.position\') AS POSITION, JSON_EXTRACT(E.DATA, \'$.total\') AS TOTAL, JSON_EXTRACT(D.DATA, \'$.caption\') AS DEVICE
+			FROM SUBSCRIPTIONS S
+			LEFT JOIN EPISODES_ACTIONS E ON S.ID = E.SUBSCRIPTION
+			LEFT JOIN DEVICES D ON D.DEVICEID = JSON_EXTRACT(E.DATA, \'$.device\')
+			WHERE e.user = ? AND e.subscription = ?
+			GROUP BY S.ID, E.URL)
+			SELECT AI.*, CASE WHEN ACTION = \'play\' THEN CAST(POSITION * 100 / TOTAL AS TEXT)
+			ELSE \'NA\'
+			END PERCENTAGE
+			ORDER BY changed DESC LIMIT 200;', $this->user->id, $subscription);
 	}
 }
