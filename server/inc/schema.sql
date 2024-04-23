@@ -29,7 +29,6 @@ CREATE UNIQUE INDEX UN1_subscription_url ON subscription (url, user_id);
 CREATE TABLE episodes_action (
 	episodes_action_id INTEGER NOT NULL PRIMARY KEY,
 	user_id INTEGER NOT NULL REFERENCES user (user_id) ON DELETE CASCADE,
-	device_id INTEGER NOT NULL REFERENCES device (device_id) ON DELETE CASCADE,
 	subscription_id INTEGER NOT NULL REFERENCES subscription (subscription_id) ON DELETE CASCADE,
 	url TEXT NOT NULL,
 	changed INTEGER NOT NULL,
