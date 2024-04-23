@@ -149,9 +149,8 @@ class GPodder
 
 	public function listActions(int $subscription): array
 	{
-		return $this->db->all('SELECT *, json_extract(data, \'$.device\') AS device,
-			json_extract(data, \'$.timestamp\') AS timestamp
-			FROM episodes_action
+		return $this->db->all('SELECT e.action, json_extract(d.data, \'$.caption\') as device, e.changed, e.url FROM episodes_action e
+			left join device d on d.device_name = json_extract(e.data, \'$.device\')
 			WHERE user_id = ? AND subscription_id = ?
 			ORDER BY changed DESC;', $this->user->user_id, $subscription);
 	}
