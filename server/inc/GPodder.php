@@ -142,7 +142,7 @@ class GPodder
 	public function listActiveSubscriptions(): array
 	{
 		return $this->db->all('SELECT s.*, COUNT(*) AS count
-			FROM subscription s LEFT JOIN episodes_action a ON a.subscription = s.subscription_id
+			FROM subscription s LEFT JOIN episodes_action a ON a.subscription_id = s.subscription_id
 			WHERE s.user_id = ? AND s.deleted = 0
 			GROUP BY s.subscription_id ORDER BY s.changed DESC;', $this->user->user_id);
 	}
