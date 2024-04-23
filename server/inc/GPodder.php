@@ -158,6 +158,7 @@ class GPodder
 			SELECT AI.*, CASE WHEN ACTION = \'play\' THEN CAST(POSITION * 100 / TOTAL AS TEXT)
 			ELSE \'NA\'
 			END PERCENTAGE
+			FROM ACTIONS_INFO AI
 			ORDER BY changed DESC LIMIT 200;', $this->user->id, $subscription);
 	}
 }
