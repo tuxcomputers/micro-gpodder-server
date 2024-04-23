@@ -98,7 +98,7 @@ elseif ($gpodder->user && $api->url === 'subscriptions') {
 		<a href="./" class="btn sm" aria-label="Go Back">&larr; Back</a>
 		<a href="./subscriptions/%s.opml" class="btn sm">OPML</a>
 	</p>',
-		htmlspecialchars($gpodder->user->name)
+		htmlspecialchars($gpodder->user->user_name)
 	);
 
 	if (isset($_GET['id'])) {
@@ -140,7 +140,7 @@ elseif ($gpodder->user) {
 	}
 
 	echo '<p class="center"><img src="icon.svg" width="150" alt="" /></p>';
-	printf('<h2 class="center">Logged in as %s</h2>', $gpodder->user->name);
+	printf('<h2 class="center">Logged in as %s</h2>', $gpodder->user->user_name);
 	printf('<h3 class="center">GPodder secret username: %s</h2>', $gpodder->getUserToken());
 	echo '<p class="center"><small>(Use this username in GPodder desktop, as it does not support passwords.)</small></p>';
 	printf('<p class="center">You have %d active subscriptions.</p><p class="center"><a href="subscriptions" class="btn sm">List my subscriptions</a></p>', $gpodder->countActiveSubscriptions());
