@@ -120,7 +120,7 @@ elseif ($gpodder->user && $api->url === 'subscriptions') {
 
 		foreach ($gpodder->listActiveSubscriptions() as $row) {
 			printf('<tr><th scope="row"><a href="?id=%d">%s</a></th><td><time datetime="%s">%s</time></td><td>%d</td></tr>',
-				$row->id,
+				$row->subscription_id,
 				htmlspecialchars($row->url),
 				date(DATE_ISO8601, $row->changed),
 				date('d/m/Y H:i', $row->changed),
