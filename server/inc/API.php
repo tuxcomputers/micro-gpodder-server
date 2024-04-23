@@ -548,6 +548,8 @@ class API
 
 		$this->requireMethod('POST');
 
+		$deviceid = explode('/', $this->path)[1] ?? null;
+
 		$input = $this->getInput();
 
 		if (!is_array($input)) {
@@ -575,7 +577,7 @@ class API
 			}
 
 			$st->bindValue(':user', $this->user->id);
-			$st->bindValue(':device_id', $this->devices->id);
+			$st->bindValue(':device_id', $deviceid);
 			$st->bindValue(':subscription', $id);
 			$st->bindValue(':url', $action->episode);
 			$st->bindValue(':changed', !empty($action->timestamp) ? strtotime($action->timestamp) : $timestamp);
