@@ -136,14 +136,14 @@ class GPodder
 
 	public function countActiveSubscriptions(): int
 	{
-		return $this->db->firstColumn('SELECT COUNT(*) FROM subscription WHERE user = ? AND deleted = 0;', $this->user->user_id);
+		return $this->db->firstColumn('SELECT COUNT(*) FROM subscription WHERE user_id = ? AND deleted = 0;', $this->user->user_id);
 	}
 
 	public function listActiveSubscriptions(): array
 	{
 		return $this->db->all('SELECT s.*, COUNT(*) AS count
 			FROM subscription s LEFT JOIN episodes_actions a ON a.subscription = s.subscription_id
-			WHERE s.user = ? AND s.deleted = 0
+			WHERE s.user_id = ? AND s.deleted = 0
 			GROUP BY s.subscription_id ORDER BY s.changed DESC;', $this->user->user_id);
 	}
 
@@ -152,7 +152,7 @@ class GPodder
 		return $this->db->all('SELECT *, json_extract(data, \'$.device\') AS device,
 			json_extract(data, \'$.timestamp\') AS timestamp
 			FROM episodes_actions
-			WHERE user = ? AND subscription = ?
+			WHERE user_id = ? AND subscription = ?
 			ORDER BY changed DESC;', $this->user->user_id, $subscription);
 	}
 }
