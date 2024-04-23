@@ -105,7 +105,7 @@ class GPodder
 			return 'Username already exists';
 		}
 
-		$this->db->simple('INSERT INTO user (name, password) VALUES (?, ?);', trim($name), password_hash($password, null));
+		$this->db->simple('INSERT INTO user (user_name, password) VALUES (?, ?);', trim($name), password_hash($password, null));
 		return null;
 	}
 
