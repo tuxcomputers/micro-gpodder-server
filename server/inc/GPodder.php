@@ -28,7 +28,7 @@ class GPodder
 			return null;
 		}
 
-		$user = $this->db->firstRow('SELECT * FROM users WHERE name = ?;', trim($_POST['login']));
+		$user = $this->db->firstRow('SELECT * FROM user WHERE name = ?;', trim($_POST['login']));
 
 		if (!$user || !password_verify(trim($_POST['password']), $user->password ?? '')) {
 			return 'Invalid username/password';
@@ -63,7 +63,7 @@ class GPodder
 		$login = strtok($username, '__');
 		$token = strtok('');
 
-		$this->user = $this->db->firstRow('SELECT * FROM users WHERE name = ?;', $login);
+		$this->user = $this->db->firstRow('SELECT * FROM user WHERE name = ?;', $login);
 
 		if (!$this->user) {
 			return false;
@@ -78,7 +78,7 @@ class GPodder
 			return true;
 		}
 
-		if (!$this->db->firstColumn('SELECT COUNT(*) FROM users;')) {
+		if (!$this->db->firstColumn('SELECT COUNT(*) FROM user;')) {
 			return true;
 		}
 
@@ -101,11 +101,11 @@ class GPodder
 			return 'Password is too short';
 		}
 
-		if ($this->db->firstColumn('SELECT 1 FROM users WHERE name = ?;', $name)) {
+		if ($this->db->firstColumn('SELECT 1 FROM user WHERE name = ?;', $name)) {
 			return 'Username already exists';
 		}
 
-		$this->db->simple('INSERT INTO users (name, password) VALUES (?, ?);', trim($name), password_hash($password, null));
+		$this->db->simple('INSERT INTO user (name, password) VALUES (?, ?);', trim($name), password_hash($password, null));
 		return null;
 	}
 
@@ -136,15 +136,15 @@ class GPodder
 
 	public function countActiveSubscriptions(): int
 	{
-		return $this->db->firstColumn('SELECT COUNT(*) FROM subscriptions WHERE user = ? AND deleted = 0;', $this->user->id);
+		return $this->db->firstColumn('SELECT COUNT(*) FROM subscription WHERE user = ? AND deleted = 0;', $this->user->user_id);
 	}
 
 	public function listActiveSubscriptions(): array
 	{
 		return $this->db->all('SELECT s.*, COUNT(*) AS count
-			FROM subscriptions s LEFT JOIN episodes_actions a ON a.subscription = s.id
+			FROM subscription s LEFT JOIN episodes_actions a ON a.subscription = s.subscription_id
 			WHERE s.user = ? AND s.deleted = 0
-			GROUP BY s.id ORDER BY s.changed DESC;', $this->user->id);
+			GROUP BY s.subscription_id ORDER BY s.changed DESC;', $this->user->user_id);
 	}
 
 	public function listActions(int $subscription): array
@@ -153,6 +153,6 @@ class GPodder
 			json_extract(data, \'$.timestamp\') AS timestamp
 			FROM episodes_actions
 			WHERE user = ? AND subscription = ?
-			ORDER BY changed DESC;', $this->user->id, $subscription);
+			ORDER BY changed DESC;', $this->user->user_id, $subscription);
 	}
 }
