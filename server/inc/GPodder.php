@@ -151,7 +151,7 @@ class GPodder
 	{
 		return $this->db->all('SELECT e.action, json_extract(d.data, \'$.caption\') as device, e.changed, e.url FROM episodes_action e
 			left join device d on d.device_name = json_extract(e.data, \'$.device\')
-			WHERE user_id = ? AND subscription_id = ?
+			WHERE e.user_id = ? AND e.subscription_id = ?
 			ORDER BY changed DESC;', $this->user->user_id, $subscription);
 	}
 }
