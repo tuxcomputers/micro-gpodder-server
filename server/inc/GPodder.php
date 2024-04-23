@@ -152,7 +152,7 @@ class GPodder
 		return $this->db->all('SELECT *, json_extract(data, \'$.device\') AS device,
 			json_extract(data, \'$.timestamp\') AS timestamp
 			FROM episodes_action
-			WHERE user_id = ? AND subscription = ?
+			WHERE user_id = ? AND subscription_id = ?
 			ORDER BY changed DESC;', $this->user->user_id, $subscription);
 	}
 }
