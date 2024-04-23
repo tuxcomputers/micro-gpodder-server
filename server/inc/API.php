@@ -413,7 +413,7 @@ class API
 			}
 
 			$this->db->simple('INSERT OR IGNORE INTO device (user_id, device_name, data) VALUES (?, ?, \'{}\');', $this->user->user_id, $device_name);
-			$this->db->simple('UPDATE devices SET data = json_patch(json_patch(data, ?), \'{"subscriptions":0}\') WHERE user_id = ? AND device_name = ? ;', json_encode($this->getInput()), $this->user->user_id, $device_name);
+			$this->db->simple('UPDATE device SET data = json_patch(json_patch(data, ?), \'{"subscriptions":0}\') WHERE user_id = ? AND device_name = ? ;', json_encode($this->getInput()), $this->user->user_id, $device_name);
 			$this->error(200, 'Device updated');
 		}
 		$this->error(400, 'Wrong request method');
@@ -431,7 +431,7 @@ class API
 		$device_name = explode('/', $this->path)[1] ?? null;
 
 		if ($this->method === 'GET' && !$v2) {
-			return $this->db->rowsFirstColumn('SELECT url FROM subscriptions WHERE user_id = ?;', $this->user->user_id);
+			return $this->db->rowsFirstColumn('SELECT url FROM subscription WHERE user_id = ?;', $this->user->user_id);
 		}
 
 		if (!$device_name || !preg_match('/^[\w.-]+$/', $device_name)) {
@@ -443,8 +443,8 @@ class API
 			$timestamp = (int)($_GET['since'] ?? 0);
 
 			return [
-				'add' => $this->db->rowsFirstColumn('SELECT url FROM subscriptions WHERE user_id = ? AND deleted = 0 AND changed >= ?;', $this->user->user_id, $timestamp),
-				'remove' => $this->db->rowsFirstColumn('SELECT url FROM subscriptions WHERE user_id = ? AND deleted = 1 AND changed >= ?;', $this->user->user_id, $timestamp),
+				'add' => $this->db->rowsFirstColumn('SELECT url FROM subscription WHERE user_id = ? AND deleted = 0 AND changed >= ?;', $this->user->user_id, $timestamp),
+				'remove' => $this->db->rowsFirstColumn('SELECT url FROM subscription WHERE user_id = ? AND deleted = 1 AND changed >= ?;', $this->user->user_id, $timestamp),
 				'update_urls' => [],
 				'timestamp' => time(),
 			];
@@ -458,7 +458,7 @@ class API
 			}
 
 			$this->db->exec('BEGIN;');
-			$st = $this->db->prepare('INSERT OR IGNORE INTO subscriptions (user_id, url, changed) VALUES (:user_id, :url, strftime(\'%s\', \'now\'));');
+			$st = $this->db->prepare('INSERT OR IGNORE INTO subscription (user_id, url, changed) VALUES (:user_id, :url, strftime(\'%s\', \'now\'));');
 
 			foreach ($lines as $url) {
 				$this->validateURL($url);
@@ -482,7 +482,7 @@ class API
 			$ts = time();
 
 			if (!empty($input->add) && is_array($input->add)) {
-				$st = $this->db->prepare('INSERT OR REPLACE INTO subscriptions (user_id, url, changed, deleted) VALUES (:user_id, :url, :ts, 0);');
+				$st = $this->db->prepare('INSERT OR REPLACE INTO subscription (user_id, url, changed, deleted) VALUES (:user_id, :url, :ts, 0);');
 
 				foreach ($input->add as $url) {
 					$this->validateURL($url);
@@ -497,7 +497,7 @@ class API
 			}
 
 			if (!empty($input->remove) && is_array($input->remove)) {
-				$st = $this->db->prepare('INSERT OR REPLACE INTO subscriptions (user_id, url, changed, deleted) VALUES (:user_id, :url, :ts, 1);');
+				$st = $this->db->prepare('INSERT OR REPLACE INTO subscription (user_id, url, changed, deleted) VALUES (:user_id, :url, :ts, 1);');
 
 				foreach ($input->remove as $url) {
 					$this->validateURL($url);
@@ -540,8 +540,8 @@ class API
 				'timestamp' => time(),
 				'actions' => $this->queryWithData('SELECT e.url AS episode, e.action, e.data, s.url AS podcast,
 					strftime(\'%Y-%m-%dT%H:%M:%SZ\', e.changed, \'unixepoch\') AS timestamp
-					FROM episodes_actions e
-					INNER JOIN subscriptions s ON s.id = e.subscription
+					FROM episodes_action e
+					INNER JOIN subscription s ON s.subscription_id = e.subscription_id
 					WHERE e.user_id = ? AND e.changed >= ?;', $this->user->user_id, $since)
 			];
 		}
@@ -559,7 +559,7 @@ class API
 		$this->db->exec('BEGIN;');
 
 		$timestamp = time();
-		$st = $this->db->prepare('INSERT INTO episodes_actions (user_id, subscription, url, changed, action, data) VALUES (:user_id, :subscription, :url, :changed, :action, :data);');
+		$st = $this->db->prepare('INSERT INTO episodes_action (user_id, subscription_id, url, changed, action, data) VALUES (:user_id, :subscription_id, :url, :changed, :action, :data);');
 
 		foreach ($input as $action) {
 			if (!isset($action->podcast, $action->action, $action->episode)) {
@@ -569,15 +569,15 @@ class API
 			$this->validateURL($action->podcast);
 			$this->validateURL($action->episode);
 
-			$id = $this->db->firstColumn('SELECT id FROM subscriptions WHERE url = ? AND user_id = ?;', $action->podcast, $this->user->user_id);
+			$id = $this->db->firstColumn('SELECT subscription_id FROM subscription WHERE url = ? AND user_id = ?;', $action->podcast, $this->user->user_id);
 
 			if (!$id) {
-				$this->db->simple('INSERT OR IGNORE INTO subscriptions (user_id, url, changed) VALUES (?, ?, ?);', $this->user->user_id, $action->podcast, $timestamp);
+				$this->db->simple('INSERT OR IGNORE INTO subscription (user_id, url, changed) VALUES (?, ?, ?);', $this->user->user_id, $action->podcast, $timestamp);
 				$id = $this->db->lastInsertRowID();
 			}
 
 			$st->bindValue(':user_id', $this->user->user_id);
-			$st->bindValue(':subscription', $id);
+			$st->bindValue(':subscription_id', $id);
 			$st->bindValue(':url', $action->episode);
 			$st->bindValue(':changed', !empty($action->timestamp) ? strtotime($action->timestamp) : $timestamp);
 			$st->bindValue(':action', strtolower($action->action));
