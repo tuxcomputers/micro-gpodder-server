@@ -102,7 +102,7 @@ elseif ($gpodder->user && $api->url === 'subscriptions') {
 	);
 
 	if (isset($_GET['id'])) {
-		echo '<table><thead><tr><th scope="col">Action</th><th scope="col">Device</th><th scope="col">Date</th><th scope="col">Played</th><th scope="col">Episode</td></tr></thead><tbody>';
+		echo '<table><thead><tr><th scope="col">Action</th><th scope="col">Device</th><th scope="col">Last Update</th><th scope="col">Played</th><th scope="col">Episode</td></tr></thead><tbody>';
 
 		foreach ($gpodder->listActions((int)$_GET['id']) as $row) {
 			printf('<tr><th scope="row">%s</th><td>%s</td><td><time datetime="%s">%s</time></td><td>%s</td><td><a href="%s">%s</a></td></tr>',
