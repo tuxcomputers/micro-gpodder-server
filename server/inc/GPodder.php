@@ -28,7 +28,7 @@ class GPodder
 			return null;
 		}
 
-		$user = $this->db->firstRow('SELECT * FROM user WHERE name = ?;', trim($_POST['login']));
+		$user = $this->db->firstRow('SELECT * FROM user WHERE user_name = ?;', trim($_POST['login']));
 
 		if (!$user || !password_verify(trim($_POST['password']), $user->password ?? '')) {
 			return 'Invalid username/password';
@@ -55,7 +55,7 @@ class GPodder
 
 	public function getUserToken(): string
 	{
-		return $this->user->name . '__' . substr(sha1($this->user->password), 0, 10);
+		return $this->user->user_name . '__' . substr(sha1($this->user->password), 0, 10);
 	}
 
 	public function validateToken(string $username): bool
@@ -63,7 +63,7 @@ class GPodder
 		$login = strtok($username, '__');
 		$token = strtok('');
 
-		$this->user = $this->db->firstRow('SELECT * FROM user WHERE name = ?;', $login);
+		$this->user = $this->db->firstRow('SELECT * FROM user WHERE user_name = ?;', $login);
 
 		if (!$this->user) {
 			return false;
@@ -101,7 +101,7 @@ class GPodder
 			return 'Password is too short';
 		}
 
-		if ($this->db->firstColumn('SELECT 1 FROM user WHERE name = ?;', $name)) {
+		if ($this->db->firstColumn('SELECT 1 FROM user WHERE user_name = ?;', $name)) {
 			return 'Username already exists';
 		}
 
