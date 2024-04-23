@@ -557,7 +557,7 @@ class API
 		$this->db->exec('BEGIN;');
 
 		$timestamp = time();
-		$st = $this->db->prepare('INSERT INTO episodes_actions (user, subscription, url, changed, action, data) VALUES (:user, :subscription, :url, :changed, :action, :data);');
+		$st = $this->db->prepare('INSERT INTO episodes_actions (user, device_id, subscription, url, changed, action, data) VALUES (:user, :device_id, :subscription, :url, :changed, :action, :data);');
 
 		foreach ($input as $action) {
 			if (!isset($action->podcast, $action->action, $action->episode)) {
@@ -575,6 +575,7 @@ class API
 			}
 
 			$st->bindValue(':user', $this->user->id);
+			$st->bindValue(':device_id', $this->devices->id);
 			$st->bindValue(':subscription', $id);
 			$st->bindValue(':url', $action->episode);
 			$st->bindValue(':changed', !empty($action->timestamp) ? strtotime($action->timestamp) : $timestamp);
