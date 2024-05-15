@@ -169,9 +169,8 @@ class GPodder
 
 	public function getFeedForSubscription(int $subscription): ?Feed
 	{
-		$data = $this->db->firstRow('SELECT f.*
-			FROM subscriptions s INNER JOIN feeds f ON f.id = s.feed
-			WHERE s.id = ?;', $subscription);
+		$data = $this->db->firstRow('SELECT * FROM getFeedForSubscription_V
+			WHERE s.subscription_id = ?;', $subscription);
 
 		if (!$data) {
 			return null;
