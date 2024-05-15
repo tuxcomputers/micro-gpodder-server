@@ -72,4 +72,14 @@ CREATE TABLE episode_action (
 CREATE INDEX IN1_episodes_idx ON episode_action (user_id, action, changed);
 CREATE INDEX IN1_episode_action_link ON episode_action (episode_id);
 
+CREATE VIEW listActions_V AS
+	SELECT a.*,
+		   d.name AS device_name,
+		   e.title,
+		   e.url AS episode_url
+		   FROM episode_action a
+		   LEFT JOIN device d ON d.device_id = a.device_id AND a.user_id = d.user_id
+		   LEFT JOIN episode e ON e.episode_id = a.episode_id
+		   ORDER BY changed DESC;
+
 PRAGMA user_version = 20240428;
