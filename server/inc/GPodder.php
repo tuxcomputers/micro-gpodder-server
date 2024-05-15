@@ -183,12 +183,7 @@ class GPodder
 
 	public function updateAllFeeds(bool $cli = false): void
 	{
-		$sql = 'SELECT s.id AS subscription, s.url, MAX(a.changed) AS changed
-			FROM subscriptions s
-				LEFT JOIN episodes_actions a ON a.subscription = s.id
-				LEFT JOIN feeds f ON f.id = s.feed
-			WHERE f.last_fetch IS NULL OR f.last_fetch < s.changed OR f.last_fetch < a.changed
-			GROUP BY s.id';
+		$sql = 'SELECT * FROM updateAllFeeds_V';
 
 		@ini_set('max_execution_time', 3600);
 		@ob_end_flush();
