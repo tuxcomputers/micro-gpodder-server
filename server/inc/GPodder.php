@@ -152,13 +152,7 @@ class GPodder
 
 	public function listActions(int $subscription): array
 	{
-		return $this->db->all('SELECT a.*,
-				d.name AS device_name,
-				e.title,
-				e.url AS episode_url
-			FROM episodes_actions a
-				LEFT JOIN devices d ON d.id = a.device AND a.user = d.user
-				LEFT JOIN episodes e ON e.id = a.episode
+		return $this->db->all('SELECT * FROM listActions_V
 			WHERE a.user = ? AND a.subscription = ?
 			ORDER BY changed DESC;', $this->user->id, $subscription);
 	}
