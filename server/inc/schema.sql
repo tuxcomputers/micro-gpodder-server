@@ -1,5 +1,5 @@
-CREATE TABLE feeds (
-	id INTEGER NOT NULL PRIMARY KEY,
+CREATE TABLE feed (
+	feed_id INTEGER NOT NULL PRIMARY KEY,
 	feed_url TEXT NOT NULL,
 	image_url TEXT NULL,
 	url TEXT NULL,
@@ -10,11 +10,11 @@ CREATE TABLE feeds (
 	last_fetch INTEGER NOT NULL
 );
 
-CREATE UNIQUE INDEX feed_url ON feeds (feed_url);
+CREATE UNIQUE INDEX UN1_feed_url ON feed (feed_url);
 
-CREATE TABLE episodes (
-	id INTEGER NOT NULL PRIMARY KEY,
-	feed INTEGER NOT NULL REFERENCES feeds (id) ON DELETE CASCADE,
+CREATE TABLE episode (
+	episode_id INTEGER NOT NULL PRIMARY KEY,
+	feed_id INTEGER NOT NULL REFERENCES feed (feed_id) ON DELETE CASCADE,
 	media_url TEXT NOT NULL,
 	url TEXT NULL,
 	image_url TEXT NULL,
@@ -24,52 +24,52 @@ CREATE TABLE episodes (
 	pubdate TEXT NULL DEFAULT CURRENT_TIMESTAMP CHECK (pubdate IS NULL OR datetime(pubdate) = pubdate)
 );
 
-CREATE UNIQUE INDEX episodes_unique ON episodes (feed, media_url);
+CREATE UNIQUE INDEX UN1_episode ON episode (feed_id, media_url);
 
-CREATE TABLE users (
-	id INTEGER NOT NULL PRIMARY KEY,
+CREATE TABLE user (
+	user_id INTEGER NOT NULL PRIMARY KEY,
 	name TEXT NOT NULL,
 	password TEXT NOT NULL
 );
 
-CREATE UNIQUE INDEX users_name ON users (name);
+CREATE UNIQUE INDEX UN1_user_name ON user (name);
 
-CREATE TABLE devices (
-	id INTEGER NOT NULL PRIMARY KEY,
-	user INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+CREATE TABLE device (
+	device_id INTEGER NOT NULL PRIMARY KEY,
+	user_id INTEGER NOT NULL REFERENCES user (user_id) ON DELETE CASCADE,
 	deviceid TEXT NOT NULL,
 	name TEXT NULL,
 	data TEXT
 );
 
-CREATE UNIQUE INDEX deviceid ON devices (deviceid, user);
+CREATE UNIQUE INDEX UN1_deviceid ON device (deviceid, user_id);
 
-CREATE TABLE subscriptions (
-	id INTEGER NOT NULL PRIMARY KEY,
-	user INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-	feed INTEGER NULL REFERENCES feeds (id) ON DELETE SET NULL,
+CREATE TABLE subscription (
+	subscription_id INTEGER NOT NULL PRIMARY KEY,
+	user_id INTEGER NOT NULL REFERENCES user (user_id) ON DELETE CASCADE,
+	feed_id INTEGER NULL REFERENCES feed (feed_id) ON DELETE SET NULL,
 	url TEXT NOT NULL,
 	deleted INTEGER NOT NULL DEFAULT 0,
 	changed INTEGER NOT NULL,
 	data TEXT
 );
 
-CREATE UNIQUE INDEX subscription_url ON subscriptions (url, user);
-CREATE INDEX subscription_feed ON subscriptions (feed);
+CREATE UNIQUE INDEX UN1_subscription_url ON subscription (url, user_id);
+CREATE INDEX IN1_subscription_feed ON subscription (feed_id);
 
-CREATE TABLE episodes_actions (
-	id INTEGER NOT NULL PRIMARY KEY,
-	user INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-	subscription INTEGER NOT NULL REFERENCES subscriptions (id) ON DELETE CASCADE,
-	episode INTEGER NULL REFERENCES episodes (id) ON DELETE SET NULL,
-	device INTEGER NULL REFERENCES devices (id) ON DELETE SET NULL,
+CREATE TABLE episode_action (
+	episode_action_id INTEGER NOT NULL PRIMARY KEY,
+	user_id INTEGER NOT NULL REFERENCES user (user_id) ON DELETE CASCADE,
+	subscription_id INTEGER NOT NULL REFERENCES subscription (subscription_id) ON DELETE CASCADE,
+	episode_id INTEGER NULL REFERENCES episode (episode_id) ON DELETE SET NULL,
+	device_id INTEGER NULL REFERENCES device (device_id) ON DELETE SET NULL,
 	url TEXT NOT NULL,
 	changed INTEGER NOT NULL,
 	action TEXT NOT NULL,
 	data TEXT
 );
 
-CREATE INDEX episodes_idx ON episodes_actions (user, action, changed);
-CREATE INDEX episodes_actions_link ON episodes_actions (episode);
+CREATE INDEX IN1_episodes_idx ON episode_action (user_id, action, changed);
+CREATE INDEX IN1_episode_action_link ON episode_action (episode_id);
 
 PRAGMA user_version = 20240428;
