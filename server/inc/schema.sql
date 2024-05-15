@@ -95,4 +95,9 @@ CREATE VIEW listActiveSubscriptions_V AS
 	GROUP BY s.subscription_id
 	ORDER BY last_change DESC;
 
+CREATE VIEW getFeedForSubscription_V AS
+	SELECT f.*, subscription_id
+	FROM subscription s
+	INNER JOIN feed f ON f.feed_id = s.feed_id;
+
 PRAGMA user_version = 20240428;
