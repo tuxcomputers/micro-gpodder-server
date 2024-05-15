@@ -82,4 +82,17 @@ CREATE VIEW listActions_V AS
 		   LEFT JOIN episode e ON e.episode_id = a.episode_id
 		   ORDER BY changed DESC;
 
+CREATE VIEW listActiveSubscriptions_V AS
+	SELECT s.*,
+		   COUNT(a.rowid) AS count,
+		   f.title,
+		   COALESCE(MAX(a.changed), s.changed) AS last_change
+	FROM subscription s
+	LEFT JOIN episode_action a ON a.subscription_id = s.subscription_id
+	LEFT JOIN feed f ON f.feed_id = s.feed_id
+	WHERE 1=1
+	  AND s.deleted = 0
+	GROUP BY s.subscription_id
+	ORDER BY last_change DESC;
+
 PRAGMA user_version = 20240428;
