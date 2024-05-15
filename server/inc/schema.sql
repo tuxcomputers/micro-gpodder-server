@@ -100,4 +100,16 @@ CREATE VIEW getFeedForSubscription_V AS
 	FROM subscription s
 	INNER JOIN feed f ON f.feed_id = s.feed_id;
 
+CREATE VIEW updateAllFeeds_V AS
+	SELECT s.subscription_id,
+		   s.url,
+		   MAX(a.changed) AS changed
+	FROM subscription s
+	LEFT JOIN episode_action a ON a.subscription_id = s.subscription_id
+	LEFT JOIN feed f ON f.feed_id = s.feed_id
+	WHERE f.last_fetch IS NULL
+	   OR f.last_fetch < s.changed
+	   OR f.last_fetch < a.changed
+	   GROUP BY s.subscription_id;
+
 PRAGMA user_version = 20240428;
