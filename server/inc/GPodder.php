@@ -141,13 +141,8 @@ class GPodder
 
 	public function listActiveSubscriptions(): array
 	{
-		return $this->db->all('SELECT s.*, COUNT(a.rowid) AS count, f.title, COALESCE(MAX(a.changed), s.changed) AS last_change
-			FROM subscriptions s
-				LEFT JOIN episodes_actions a ON a.subscription = s.id
-				LEFT JOIN feeds f ON f.id = s.feed
-			WHERE s.user = ? AND s.deleted = 0
-			GROUP BY s.id
-			ORDER BY last_change DESC;', $this->user->id);
+		return $this->db->all('SELECT * FROM listActiveSubscriptions_V
+			WHERE s.user = ? ;', $this->user->id);
 	}
 
 	public function listActions(int $subscription): array
@@ -159,7 +154,7 @@ class GPodder
 
 	public function updateFeedForSubscription(int $subscription): ?Feed
 	{
-		$url = $this->db->firstColumn('SELECT url FROM subscriptions WHERE id = ?;', $subscription);
+		$url = $this->db->firstColumn('SELECT url FROM subscription WHERE id = ?;', $subscription);
 
 		if (!$url) {
 			return null;
